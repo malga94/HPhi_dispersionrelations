@@ -22,7 +22,7 @@ def prepare_color_file(nsite):
 		pass
 
 	for i in range(0, nsite):
-		os.system("cat ./kx{0}/output/zvo_DynamicalGreen.dat >> ./colorplot.def".format(i/nsite))
+		os.system("cat ./kx{0}ky{1}/output/zvo_DynamicalGreen.dat >> ./colorplot.def".format(i/nsite, 0))
 
 def prepare_list_to_plot(nsite, nOmega):
 

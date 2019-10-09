@@ -13,22 +13,12 @@ import pandas as pd
 import json
 
 dynamicalGreen_file_columns = ["omega_Re", "omega_Im", "Re(G(z))", "Im(G(z))"]
-supported_lattice_dict = {"chain": 1, "ladder": 2}
+supported_lattice_dict = {"chain": 1, "ladder": 2, "square": 3}
 
 #Since the template of the Standard.in file changes according to what kind of lattice we run (for instance the chain has one dimension L and one exchange J, the ladder has two of each), we create a json file containing all the templates in the form of dict,
 #in ./modules/templates.json
 #We will have to manually add the template for new lattice we wish to implement in this program. The function returns input_file_syntax which contains the template for the chosen lattice
 def get_lattice_syntax():
-
-	try:
-		os.chdir("./PrepareData")
-	#If the directory does not exist we create it
-	except:
-		os.mkdir("./PrepareData")
-		os.chdir("./PrepareData")
-		os.system("cat ../modules/standard_template.def > Standard.in")
-	finally:
-		os.chdir("..")
 
 	try:
 		with open("./PrepareData/Standard.in", "r") as f:
@@ -77,11 +67,12 @@ def get_dimensions():
 				input_file = f.read()
 
 			site_number = input_file.splitlines()[input_file_syntax["L"]].split("=")[1].replace(" ", "")
-			return int(site_number), 1
+			return int(site_number), 1, lattice_num
 		except:
-			return 1, 1
+			print("Could not find the length of the chain in the input file. Please add the relevant line to Standard.in")
+			exit()
 
-	elif lattice.lower() == "ladder":
+	elif lattice.lower() == "ladder" or lattice.lower() == "square":
 		try:
 			with open("./PrepareData/Standard.in", "r") as f:
 				input_file = f.read()
@@ -89,13 +80,10 @@ def get_dimensions():
 			length = input_file.splitlines()[input_file_syntax["L"]].split("=")[1].replace(" ", "")
 			width = input_file.splitlines()[input_file_syntax["W"]].split("=")[1].replace(" ", "")
 
-			return int(length), int(width)
+			return int(length), int(width), lattice_num
 		except:
-			return 1, 1
-
-	elif lattice_num < 0:
-		return 1, 1
-
+			print("Could not find the length/width of the system in the input file. Please add the relevant line to Standard.in")
+			exit()
 
 def get_energy():
 
@@ -129,6 +117,14 @@ def filter_comments(settings):
 
 	return filter_comments
 
+def isfloat(x):
+
+	try:
+		a = float(x)
+		return True
+	except ValueError:
+		return False
+
 def fetch_settings():
 
 	values_to_set = []
@@ -140,47 +136,91 @@ def fetch_settings():
 	except FileNotFoundError as fnf_error:
 		print(fnf_error)
 		print("Using the standard HPhi settings instead")
+		return False
 
 	settings = settings_file.splitlines()
 	settings = filter_comments(settings)
+	
 	for line in settings:
-		values_to_set.append([int(x) for x in line.split() if x.isdigit()][0])
+		try:
+			values_to_set.append([float(x) for x in line.split() if isfloat(x.lstrip('-'))][0])
+		except Exception as e:
+			print(str(e))
+			print("\nThis is because in the ./modules/settings.def file all lines should specify a number, not a string or anything else")
 
 	return values_to_set
 
-def clear_workspace(length):
+def read_kpath(length, width):
+	#A function to read the kpath document, which tells the program on which k-path to compute the dispersion relation for the square lattice.
+	#The syntax of the file is the following: the first line is a header, and from the second line onwards there is a pair of integer values separated by a comma, which represent a point in real space. These values are the coordinates of a given site,
+	#where the site indexes start from (0,0). Each new line represents a new point. The "k-path" can be as long as the user wants (in other words the file can have as many lines as one wants) and if the coordinates specified exceed the dimensions of 
+	#the square lattice, they will be "folded" back to a valid coordinate with the % operator
+
+	x_kpath = []
+	y_kpath = []
+
+	try:
+		with open("./modules/kpath.def") as f:
+			kpath_file = f.read()
+
+	except FileNotFoundError as fnf_error:
+		print(fnf_error)
+		print("Working on horizontal k-path with Ky = 0")
+		for i in range(0, width):
+			x_kpath.append(i)
+		return x_kpath, [0]*length
+
+	points = kpath_file.splitlines()
+	
+	for i in range(1, len(points)):
+		x_coord = int(points[i].split(",")[0])
+		y_coord = int(points[i].split(",")[1])
+
+		if x_coord >= width:
+			x_coord = x_coord%width
+
+		if y_coord >= length:
+			y_coord = y_coord%width
+
+		x_kpath.append(x_coord)
+		y_kpath.append(y_coord)
+
+	return x_kpath, y_kpath
+
+def clear_workspace():
 
 	os.system("rm -Rf kx0*")
 
 	os.chdir("./PrepareData")
 
-	os.system("rm -R output calcmod.def coulombinter.def exchange.def geometry.dat greenone.def greentwo.def hund.def lattice.gp locspn.def modpara.def namelist.def pair.def 2> /dev/null")
+	os.system("rm -R output calcmod.def coulombinter.def exchange.def geometry.dat greenone.def greentwo.def hund.def lattice.gp locspn.def modpara.def namelist.def pair.def InterAll.def 2> /dev/null")
 	
 	os.chdir("..")
 
-def run_Hphi(i, length):
+def run_Hphi(length, width, kx, ky):
 
 	lattice, lattice_num, input_file_syntax = get_lattice_syntax()
-	
-	os.system("rsync -a --exclude='./PrepareData/std_job.out' --exclude='./PrepareData/Standard.in' PrepareData/ kx{0}".format(i/length, '.3f'))
+
+	os.system("rsync -a --exclude='./PrepareData/std_job.out' --exclude='./PrepareData/Standard.in' PrepareData/ kx{0}ky{1}".format(kx, ky, '.3f'))
 	#TODO: Ma perchè se ho formattato con .3f rsync mi copia ancora le cartelle chiamandole con float a 3000 cifre decimali?? Che problemi ha?	
-	os.system("./modules/writepair {0} {1} {2} > ./kx{0}/pair.def".format(i/length, length, lattice_num, '.3f'))
-	os.chdir("./kx{0}".format(i/length, '.3f'))
-	os.system("../HPhi -e namelist.def > kx{0}_job.out".format(i/length, '.3f'))
+	os.system("./modules/writepair {0} {1} {2} {3} {4} > ./kx{0}ky{1}/pair.def".format(kx, ky, length, width, lattice_num, '.3f'))
+	os.chdir("./kx{0}ky{1}".format(kx, ky, '.3f'))
+	os.system("../HPhi -e namelist.def > kx{0}ky{1}_job.out".format(kx, ky, '.3f'))
 	os.chdir("..")
 
-def generate_plot(i, df, length):
+def generate_plot(kx, ky, df, length):
 	
-	os.chdir("./kx{0}".format(i/length, '.3f'))
+	os.chdir("./kx{0}ky{1}".format(kx, ky, '.3f'))
 	temp_df = pd.read_csv("./output/zvo_DynamicalGreen.dat", header = None, index_col=False, names = dynamicalGreen_file_columns, sep = ' ')
 	
 	min_val = temp_df[temp_df['Im(G(z))']==temp_df['Im(G(z))'].min()].iloc[0]
 	df_colormap = temp_df[['omega_Re', 'Im(G(z))']].copy()
 	
-	df_colormap['kx'] = [i/length]*temp_df.shape[0]
+	df_colormap['kx'] = [kx]*temp_df.shape[0]
 	
 	#TODO: Perchè se metto sort=False o sort=True in questo append, non funziona più nulla
 	df = df.append(min_val)
+	#TODO: Sto scemo di df così contiene anche un indice, che è il numero della riga di zvo_DynamicalGreen in cui c'è il minimo. Va levato perchè il file dispersion_relation.def in cui metto questo df diventa incasinato
 	os.chdir("..")	
 	return df, df_colormap
 

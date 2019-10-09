@@ -6,7 +6,8 @@
 	"L": 3,
 	"J": 4,
 	"h": 5,
-	"EigenvecIO": 6
+	"EigenvecIO": 6,
+	"J'": 7
 	},
  "ladder":{
 	"model": 0,
@@ -16,7 +17,22 @@
 	"W": 4,
         "J0": 5,
 	"J1": 6,
-        "h": 7,
-        "EigenvecIO": 8
+	"J2": 7,
+	"J1'": 8,
+	"J2'": 9,
+        "h": 10,
+        "EigenvecIO": 11
+	},
+"square":{
+	"model": 0,
+	"method": 1,
+        "lattice": 2,
+        "L": 3,
+        "W": 4,
+        "J0": 5,
+        "J1": 6,
+	"J'": 7,
+	"h": 8,
+	"EigenvecIO": 9
 	}
 }
