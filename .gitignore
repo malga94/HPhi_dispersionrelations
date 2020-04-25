@@ -4,3 +4,6 @@ plot.py
 kx0*
 plot_dispersion
 firstGUI.py
+*.pyc
+writeup
+cleandir.sh
