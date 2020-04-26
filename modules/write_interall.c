@@ -10,10 +10,9 @@ int lattice = atoi(argv[3]);
 float DM = atof(argv[4]);
 float S = atof(argv[5]);
 float J = atof(argv[6]);
-float Jt = atof(argv[7]);
 
 int Nsites = L*W;
-
+float Jt = J;
 if (lattice==1) {
       int i=0;
 

@@ -84,7 +84,6 @@ def add_interall_to_namelist(S):
 		use_only_interall = "sed -e 's/Exchange.*//' namelist.def | sed -e 's/CoulombInter.*//' | sed -e 's/Hund.*//' | awk 'NF' > temp.def"
 		os.system(use_only_interall)
 		os.system("mv temp.def namelist.def")
-		os.system("rm temp.def")
 		os.system("../HPhi -e namelist.def > exp_job.out")
 		os.chdir("..")
 
@@ -183,7 +182,7 @@ def fetch_settings():
 
 	return values_to_set, keys_to_set
 
-def read_kpath(length, width):
+def read_kpath(length, width, lattice_num):
 	#A function to read the kpath document, which tells the program on which k-path to compute the dispersion relation for the square lattice.
 	#The syntax of the file is the following: the first line is a header, and from the second line onwards there is a pair of integer values separated by a comma, which represent a point in real space. These values are the coordinates of a given site,
 	#where the site indexes start from (0,0). Each new line represents a new point. The "k-path" can be as long as the user wants (in other words the file can have as many lines as one wants) and if the coordinates specified exceed the dimensions of
@@ -192,33 +191,39 @@ def read_kpath(length, width):
 	x_kpath = []
 	y_kpath = []
 
-	try:
-		with open("./modules/kpath.def") as f:
-			kpath_file = f.read()
+	if lattice_num == 3:
+		try:
+			with open("./modules/kpath.def") as f:
+				kpath_file = f.read()
 
-	except FileNotFoundError as fnf_error:
-		print(fnf_error)
-		print("Working on horizontal k-path with Ky = 0")
-		for i in range(0, width):
+		except FileNotFoundError as fnf_error:
+			print(fnf_error)
+			print("Working on horizontal k-path with Ky = 0")
+			for i in range(0, width):
+				x_kpath.append(i)
+			return x_kpath, [0]*length
+
+		points = kpath_file.splitlines()
+
+		for i in range(1, len(points)):
+			x_coord = int(points[i].split(",")[0])
+			y_coord = int(points[i].split(",")[1])
+
+			if x_coord >= width:
+				x_coord = x_coord%width
+
+			if y_coord >= length:
+				y_coord = y_coord%width
+
+			x_kpath.append(x_coord)
+			y_kpath.append(y_coord)
+
+		return x_kpath, y_kpath
+
+	else:
+		for i in range(0, length):
 			x_kpath.append(i)
 		return x_kpath, [0]*length
-
-	points = kpath_file.splitlines()
-
-	for i in range(1, len(points)):
-		x_coord = int(points[i].split(",")[0])
-		y_coord = int(points[i].split(",")[1])
-
-		if x_coord >= width:
-			x_coord = x_coord%width
-
-		if y_coord >= length:
-			y_coord = y_coord%width
-
-		x_kpath.append(x_coord)
-		y_kpath.append(y_coord)
-
-	return x_kpath, y_kpath
 
 def clear_workspace():
 
@@ -234,7 +239,7 @@ def run_Hphi(length, width, kx, ky):
 
 	lattice, lattice_num, input_file_syntax = get_lattice_syntax()
 
-	os.system("rsync -a --exclude='./PrepareData/std_job.out' --exclude='./PrepareData/Standard.in' PrepareData/ kx{0}ky{1}".format(kx, ky, '.3f'))
+	os.system("rsync -a --exclude='./PrepareData/std_job.out' --exclude='./PrepareData/exp_job.out' --exclude='./PrepareData/Standard.in' PrepareData/ kx{0}ky{1}".format(kx, ky, '.3f'))
 	#TODO: Ma perchè se ho formattato con .3f rsync mi copia ancora le cartelle chiamandole con float a 3000 cifre decimali?? Che problemi ha?
 	os.system("./modules/writepair {0} {1} {2} {3} {4} > ./kx{0}ky{1}/pair.def".format(kx, ky, length, width, lattice_num, '.3f'))
 	os.chdir("./kx{0}ky{1}".format(kx, ky, '.3f'))
@@ -250,9 +255,10 @@ def generate_plot(kx, ky, df, length):
 	df_colormap = temp_df[['omega_Re', 'Im(G(z))']].copy()
 
 	df_colormap['kx'] = [kx]*temp_df.shape[0]
-
+	
 	#TODO: Perchè se metto sort=False o sort=True in questo append, non funziona più nulla
 	df = df.append(min_val)
+
 	#TODO: Sto scemo di df così contiene anche un indice, che è il numero della riga di zvo_DynamicalGreen in cui c'è il minimo. Va levato perchè il file dispersion_relation.def in cui metto questo df diventa incasinato
 	os.chdir("..")
 	return df, df_colormap
