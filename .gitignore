@@ -7,3 +7,6 @@ firstGUI.py
 *.pyc
 writeup
 cleandir.sh
+venv
+gui.py
+stats.txt

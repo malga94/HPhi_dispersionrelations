@@ -5,9 +5,9 @@
 	"lattice": 2,
 	"L": 3,
 	"J": 4,
-	"h": 5,
-	"EigenvecIO": 6,
-	"J'": 7
+	"J'": 5,
+	"h": 6,
+	"EigenvecIO": 7
 	},
  "ladder":{
 	"model": 0,
@@ -32,7 +32,8 @@
         "J0": 5,
         "J1": 6,
 	"J'": 7,
-	"h": 8,
-	"EigenvecIO": 9
+	"J''": 8,
+	"h": 9,
+	"EigenvecIO": 10
 	}
 }
