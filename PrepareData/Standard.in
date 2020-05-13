@@ -1,7 +1,8 @@
 model = "SpinGC"
 method = "Lanczos"
-lattice = "chain"
-L = 12
+lattice = "square"
+L = 4
+W = 4
 J = -1
 h = 0
 EigenvecIO="Out"

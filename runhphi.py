@@ -29,17 +29,11 @@ def plot(lattice_num, x_kpath, y_kpath, length, width, num_kvals, nOmega, gs_ene
 
 	if lattice_num == 3:
 		for i in range(len(x_kpath)):
-			df, df_singlekx_colormap = generate_plot(x_kpath[i]/width, y_kpath[i]/length, df, length)
+			df = generate_plot(x_kpath[i]/width, y_kpath[i]/length, df, length)
 
 	else:
 		for i in range(0, length):
-			df, df_singlekx_colormap = generate_plot(i/length, 0, df, length)
-			df_colormap = df_colormap.append(df_singlekx_colormap)
-
-	df_colormap = df_colormap.append(df_colormap.loc[df_colormap["kx"] == 0.0])
-
-	with open("./colorplot.def", "w") as f:
-		df_colormap.to_csv(f, sep = ' ')
+			df = generate_plot(i/length, 0, df, length)
 
 	df = df.append(df.iloc[0], sort = False)
 
@@ -63,8 +57,8 @@ def plot(lattice_num, x_kpath, y_kpath, length, width, num_kvals, nOmega, gs_ene
 	plt.savefig("./dispersion_plot", format = 'pdf')
 	plt.show()
 
-	if lattice_num != 3: #Currently not working for square lattice (the whole colormap program has to be rewritten anyways)
-		plot_colormap(length, nOmega)
+ 	#Currently not working for square lattice (the whole colormap program has to be rewritten anyways)
+	plot_colormap(lattice_num, length, width, x_kpath, y_kpath, nOmega)
 
 def main():
 
@@ -125,12 +119,11 @@ def main():
 			else:
 				output_hamiltonian(length, width, lattice_num)
 
-		J_list = get_exchange()
-
 		if S != 1:
 			modify_locspn(S)
 
 		if DM_interaction != 0 or S != 1:
+			J_list = get_exchange()
 			print("Adding InterAll file")
 			os.system("./modules/write_interall {0} {1} {2} {3} {4} {5} {6} > ./PrepareData/InterAll.def".format(length, width, lattice_num, DM_interaction, S, float(J_list[0]), float(J_list[1])))
 			#When 2S!=1 we must use InterAll instead of the usual exchange.def, Hund.def and CoulombInter.def. Thus, the three latter files have to be removed from namelist.def, so that only InterAll.def is used
@@ -138,6 +131,7 @@ def main():
 
 		if anisotropy != 0:
 			print("Adding anisotropy")
+			J_list = get_exchange()
 			#Changing coulombinter and hund files to include the anisotropy (they govern the SzSz part of the Heisenberg Hamiltonian)
 			#NB:Still have to write most interactions for the ladder
 			os.system("./modules/write_anisotropy {0} {1} {2} {3} {4} {5} {6} {7} {8} {9} > ./PrepareData/coulombinter.def".format(length, width, lattice_num, float(J_list[0]), float(J_list[1]), float(J_list[2]), float(J_list[3]), float(J_list[4]), anisotropy, 0))

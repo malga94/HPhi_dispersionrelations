@@ -520,13 +520,8 @@ def generate_plot(kx, ky, df, length):
 	temp_df = pd.read_csv("./output/zvo_DynamicalGreen.dat", header = None, index_col=False, names = dynamicalGreen_file_columns, sep = ' ')
 
 	min_val = temp_df[temp_df['Im(G(z))']==temp_df['Im(G(z))'].min()].iloc[0]
-	df_colormap = temp_df[['omega_Re', 'Im(G(z))']].copy()
 
-	df_colormap['kx'] = [kx]*temp_df.shape[0]
+	df = df.append(min_val, sort=False)
 
-	#TODO: Perchè se metto sort=False o sort=True in questo append, non funziona più nulla
-	df = df.append(min_val)
-
-	#TODO: Sto scemo di df così contiene anche un indice, che è il numero della riga di zvo_DynamicalGreen in cui c'è il minimo. Va levato perchè il file dispersion_relation.def in cui metto questo df diventa incasinato
 	os.chdir("..")
-	return df, df_colormap
+	return df
