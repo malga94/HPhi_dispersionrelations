@@ -10,3 +10,8 @@ cleandir.sh
 venv
 gui.py
 stats.txt
+plot_dispersion
+Hamiltonian.dat
+rerun.sh
+PrepareData
+output_ham.dat

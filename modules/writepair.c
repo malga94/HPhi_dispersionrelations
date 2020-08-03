@@ -38,6 +38,12 @@ void write_square(float kx, float ky, int L, int W) {
     }
 }
 
+void write_double(float kx, float ky, int L, int W) {
+
+  printf("=============================================\nNPair %d\n=============================================\n=============================================\n=============================================\n", L*W);
+
+}
+
 int main(int argc, char **argv) {
 
   float kx = atof(argv[1]);

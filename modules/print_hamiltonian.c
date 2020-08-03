@@ -41,7 +41,7 @@ int main(int argc, char **argv) {
   FILE *fp;
   char buff[255];
 
-  fp = fopen("../PrepareData/output/zvo_Ham.dat", "r");
+  fp = fopen("../full_diag_PrepareData/output/zvo_Ham.dat", "r");
   //Reading first two lines of zvo_Ham.dat. The first line is useless, the second specifies the dimensions of
   //the Hamiltonian matrix and the number of non-zero elements (3 ints) in this order, separated by spaces
   fgets(buff, 255, (FILE*)fp);

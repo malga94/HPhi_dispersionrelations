@@ -40,7 +40,7 @@ def prepare_list_to_plot(nkpoints, nOmega):
 
 	vals = [nOmega*i for i in range(0, nkpoints+1)]
 	for val in vals:
-		Y = df[['Im(G(z))']].loc[val:val+499].values
+		Y = df[['Im(G(z))']].loc[val:val+nOmega-1].values
 		#next line simply because loc returns a list of one element instead of simply a number, so that Y is a list of lists. I want Y to be just a list
 		Y = [y[0] for y in Y]
 		Z.append(Y)
@@ -64,7 +64,7 @@ def turn_around_listoflists(Z):
 
 	return lista_vera
 
-def plot_colormap(lattice_num, length, width, x_kpath, y_kpath, nOmega):
+def plot_colormap(lattice_num, length, width, x_kpath, y_kpath, nOmega, do_we_plot):
 
 	prepare_color_file(lattice_num, length, width, x_kpath, y_kpath)
 
@@ -79,9 +79,10 @@ def plot_colormap(lattice_num, length, width, x_kpath, y_kpath, nOmega):
 
 	ZTranspose = turn_around_listoflists(Z)
 
-	plt.pcolor(ZTranspose)
-	# print(np.linspace(-2.5, 3, 10))
-	# plt.yticks(np.linspace(0, 500, 20), np.linspace(-2.50, 7, 20))
-	# plt.xticks(np.arange(0, len(Z.columns), 1), Z.columns)
+	if do_we_plot != 0:
+		plt.pcolor(ZTranspose)
+		# print(np.linspace(-2.5, 3, 10))
+		# plt.yticks(np.linspace(0, 500, 20), np.linspace(-2.50, 7, 20))
+		# plt.xticks(np.arange(0, len(Z.columns), 1), Z.columns)
 
-	plt.show()
+		plt.show()

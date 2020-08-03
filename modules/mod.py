@@ -84,7 +84,7 @@ def did_it_run(dir):
 #Function to determine if last run was interrupted before finishing properly
 def run_interrupted():
 
-	#Listing all directories that start with kx, which are the ones
+	#Listing all directories that start with kx, which are the ones created in the previous run
 	dgf_dirs = []
 	ls = os.listdir()
 	for dir in ls:
@@ -99,10 +99,10 @@ def run_interrupted():
 
 	return False
 
-def modify_modpara(gs_energy, nOmega):
+def modify_modpara(gs_energy, max_omega, nOmega):
 
 	os.chdir("./PrepareData")
-	sed_command_for_DGF = "sed -e 's/OmegaOrg.*/OmegaIm        0.5/' modpara.def | sed 's/NOmega.*/NOmega         {0}/' | sed 's/OmegaMax.*/OmegaMax       7/' | sed 's/OmegaMin.*/OmegaMin       {1}/g' > modpara.def.tmp && mv modpara.def.tmp modpara.def".format(nOmega, gs_energy)
+	sed_command_for_DGF = "sed -e 's/OmegaOrg.*/OmegaIm        0.5/' modpara.def | sed 's/NOmega.*/NOmega         {0}/' | sed 's/OmegaMax.*/OmegaMax       {1}/' | sed 's/OmegaMin.*/OmegaMin       {2}/g' > modpara.def.tmp && mv modpara.def.tmp modpara.def".format(nOmega, max_omega, gs_energy)
 	os.system(sed_command_for_DGF)
 	os.chdir("..")
 
@@ -278,6 +278,7 @@ def output_hamiltonian(length, width, lattice_num):
 
 	os.system("../HPhi -s Standard.in > ../PrepareData/output_ham_std_job.out")
 	os.system("../modules/print_hamiltonian")
+	os.system("cp ./output/zvo_Ham.dat ../Hamiltonian.dat")
 	os.chdir("..")
 	os.system("rm -Rf full_diag_PrepareData")
 
@@ -423,7 +424,7 @@ def fetch_settings():
 	except FileNotFoundError as fnf_error:
 		print(fnf_error)
 		print("Using the standard HPhi settings instead")
-		return False
+		return False, 0
 
 	settings = settings_file.splitlines()
 	settings = filter_comments(settings)

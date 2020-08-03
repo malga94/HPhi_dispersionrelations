@@ -18,9 +18,21 @@ dynamicalGreen_file_columns = ["omega_Re", "omega_Im", "Re(G(z))", "Im(G(z))"]
 
 def main():
 
-	if int(sys.argv[1]) == True:
-		clear_workspace()
+	if sys.argv[1] == "-h":
+		print("Program that prepares directories and compiles c programs so that everything is ready to actually run HPhi and compute the dispersion relation for the system. Options:\n0: Runs normally\n1: Clears the workspace and returns to a clean state as if the program was just downloaded from GitHub\n-h: display this help text")
 		exit()
+
+	try:
+		if int(sys.argv[1]) == True:
+			clear_workspace()
+			exit()
+	except ValueError:
+		print("Invalid option. Use option -h for help menu")
+		exit()
+	except Exception as e:
+		print("Unexpected error:{0}", str(e))
+		exit()
+		
 	#Let's create the main directory, where the standard mode will be run and thus the energy and eigenvector of the ground state of the system will be calculated
 	try:
 		os.chdir("./PrepareData")
