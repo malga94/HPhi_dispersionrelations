@@ -64,7 +64,7 @@ def turn_around_listoflists(Z):
 
 	return lista_vera
 
-def plot_colormap(lattice_num, length, width, x_kpath, y_kpath, nOmega, do_we_plot):
+def plot_colormap(lattice_num, length, width, x_kpath, y_kpath, nOmega, do_we_plot, do_we_show):
 
 	prepare_color_file(lattice_num, length, width, x_kpath, y_kpath)
 
@@ -81,8 +81,10 @@ def plot_colormap(lattice_num, length, width, x_kpath, y_kpath, nOmega, do_we_pl
 
 	if do_we_plot != 0:
 		plt.pcolor(ZTranspose)
+		plt.savefig("./color_dispersion_plot", format = 'pdf')
 		# print(np.linspace(-2.5, 3, 10))
 		# plt.yticks(np.linspace(0, 500, 20), np.linspace(-2.50, 7, 20))
 		# plt.xticks(np.arange(0, len(Z.columns), 1), Z.columns)
 
-		plt.show()
+		if do_we_show:
+			plt.show()

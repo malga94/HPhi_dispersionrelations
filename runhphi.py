@@ -40,7 +40,7 @@ def write_to_log(time_elapsed, num_kvals, lattice_num, nOmega, nSites, log_lengt
 	with open('./log.def', 'a') as f:
 		f.write("Date: {0}\nLattice: {1}, Nsites: {2}, Kvalues: {3}, NOmega: {4}\nElapsed time (seconds): {5}\n\n".format(datetime.datetime.now(), lattice_num, nSites, num_kvals, nOmega, time_elapsed))
 
-def plot(lattice_num, x_kpath, y_kpath, length, width, num_kvals, nOmega, gs_energy, do_we_plot):
+def plot(lattice_num, x_kpath, y_kpath, length, width, num_kvals, nOmega, gs_energy, do_we_plot, do_we_show):
 
 	#We define the dataframe which will contain the dynamical Green function (DGF for short); our aim is to plot the k values against the real frequencies column of this dataframe
 	df = pd.DataFrame(columns = dynamicalGreen_file_columns)
@@ -77,10 +77,11 @@ def plot(lattice_num, x_kpath, y_kpath, length, width, num_kvals, nOmega, gs_ene
 	if do_we_plot != 0:
 		plt.plot(np.linspace(0, 1, num_kvals+1), list(df.iloc[:,0]))
 		plt.savefig("./dispersion_plot", format = 'pdf')
-		plt.show()
+		if do_we_show:
+			plt.show()
 
  	#Currently not working for square lattice (the whole colormap program has to be rewritten anyways)
-	plot_colormap(lattice_num, length, width, x_kpath, y_kpath, nOmega, do_we_plot)
+	plot_colormap(lattice_num, length, width, x_kpath, y_kpath, nOmega, do_we_plot, do_we_show)
 
 def main():
 
@@ -154,6 +155,11 @@ def main():
 				do_we_plot = 1
 
 			try:
+				do_we_show = settings["show_plot"]
+			except KeyError:
+				do_we_show = 1
+				
+			try:
 				log_length = settings["log_file_length"]
 			except KeyError:
 				log_length = 100
@@ -177,6 +183,7 @@ def main():
 		output_ham = 0
 		do_we_plot = 1
 		log_length = 100
+		do_we_show = 1
 		ignore_warnings = 0
 
 	gs_energy = get_energy()
@@ -229,7 +236,7 @@ def main():
 	time_elapsed = end-start
 	write_to_log(time_elapsed, num_kvals, lattice_num, nOmega, length*width, log_length)
 
-	plot(lattice_num, x_kpath, y_kpath, length, width, num_kvals, nOmega, gs_energy, do_we_plot)
+	plot(lattice_num, x_kpath, y_kpath, length, width, num_kvals, nOmega, gs_energy, do_we_plot, do_we_show)
 
 if __name__ == '__main__':
 	main()

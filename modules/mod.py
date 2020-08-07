@@ -488,7 +488,7 @@ def clear_workspace():
 
 	os.chdir("./PrepareData")
 
-	os.system("rm -R output calcmod.def coulombinter.def exchange.def geometry.dat greenone.def greentwo.def hund.def lattice.gp locspn.def modpara.def namelist.def pair.def InterAll.def output_ham_std_job.out 2> /dev/null")
+	os.system("rm -R output calcmod.def coulombinter.def exchange.def geometry.dat greenone.def greentwo.def hund.def lattice.gp locspn.def modpara.def namelist.def pair.def InterAll.def trans.def output_ham_std_job.out 2> /dev/null")
 
 	os.chdir("..")
 

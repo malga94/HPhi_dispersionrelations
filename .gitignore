@@ -15,3 +15,5 @@ Hamiltonian.dat
 rerun.sh
 PrepareData
 output_ham.dat
+color_dispersion_plot
+dyn_green_plot.py

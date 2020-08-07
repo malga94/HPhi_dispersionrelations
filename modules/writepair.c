@@ -4,12 +4,23 @@
 #define pi 3.14159
 
 void write_chain(float kx, int L) {
-
+  int single = 0;
   int i = 0;
-  printf("=============================================\nNPair %d\n=============================================\n=============================================\n=============================================\n", L);
-  for (i=0; i<L; i++) {
-    printf("%d 0 %d 1 0 ", i, i);
-    printf("%lf %lf\n", cos(2*kx*pi*i), sin(2*kx*pi*i));
+  if (single == 0) {
+    printf("=============================================\nNPair %d\n=============================================\n=============================================\n=============================================\n", L);
+    for (i=0; i<L; i++) {
+      printf("%d 0 %d 1 0 ", i, i);
+      printf("%lf %lf\n", cos(2*kx*pi*i), sin(2*kx*pi*i));
+    }
+  }
+
+  //Legacy code remaining to test the SingleExcitation file. Should define a magnon state starting from the GS, just like pair.def does: try to test it eventually
+  else {
+    printf("=============================================\nNSingle %d\n=============================================\n=============================================\n=============================================\n", L*2);
+    for (i=0; i<L; i++) {
+      printf("%d 0 0 %lf, %lf\n", i, cos(2*kx*pi*i), sin(2*kx*pi*i));
+      printf("%d 1 1 %lf, %lf\n", i, cos(2*kx*pi*i), sin(2*kx*pi*i));
+    }
   }
 
 }
@@ -40,7 +51,18 @@ void write_square(float kx, float ky, int L, int W) {
 
 void write_double(float kx, float ky, int L, int W) {
 
+  //Maybe eventually the user can specify kz, altough I don't see the need for bilayer systems
+  float kz = 0;
   printf("=============================================\nNPair %d\n=============================================\n=============================================\n=============================================\n", L*W);
+
+  for (int k=0; k<2; k++) {  
+    for (int i=0; i<4; i++) {
+      for (int j=0; j<4; j++) {
+        printf("%d 0 %d 1 0 ", j+4*i+16*k, j+4*i*+16*k);
+        printf("%lf %lf\n", cos(2*pi*j*kx)*cos(2*pi*i*ky)*cos(2*pi*k*kz)-sin(2*pi*j*kx)*sin(2*pi*i*ky)*cos(2*pi*k*kz)-cos(2*pi*j*kx)*sin(2*pi*i*ky)*sin(2*pi*k*kz)-sin(2*pi*j*kx)*cos(2*pi*i*ky)*sin(2*pi*k*kz), cos(2*pi*j*kx)*sin(2*pi*i*ky)*cos(2*pi*k*kz)+sin(2*pi*j*kx)*cos(2*pi*i*ky)*cos(2*pi*k*kz)+cos(2*pi*j*kx)*cos(2*pi*i*ky)*sin(2*pi*k*kz)-sin(2*pi*j*kx)*sin(2*pi*i*ky)*sin(2*pi*k*kz));
+      }
+    }
+  }
 
 }
 
